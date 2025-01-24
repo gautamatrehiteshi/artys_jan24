@@ -157,3 +157,9 @@ peer chaincode install -l node -n <chaincode_name> -v <verion_number> -p /var/hy
 ### Instantiate on the chosen Network (channel)
 peer chaincode instantiate -C <channel_name> -l node -n <chaincode_name> -v <versio_number> -c '{"Args":["init", "<chaincode_name>"]}' -P "AND ('PeerMSP.member')"
 ```
+working dependencies version
+Docker version  - 27.5.0, build a187fa5
+Docker Compose version v2.20.2-desktop.1
+GNU Make 4.3
+Built for x86_64-pc-linux-gnu
+node version -   v12.22.12
