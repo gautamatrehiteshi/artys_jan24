@@ -1,0 +1,215 @@
+version: '2'
+
+networks:
+  artys_net:
+    external:
+      name: artys_net
+
+services:
+  ##################################################################################################################
+  ###                                                CA                                                          ###
+  ##################################################################################################################
+  ca.org1.artys:
+    container_name: ca.org1.artys
+    extends:
+      file: /home/src/docker-compose-base.yml
+      service: ca
+    environment:
+      - FABRIC_CA_SERVER_CSR_CN=ca.org1.artys
+      - FABRIC_CA_SERVER_CSR_HOSTS=ca.org1.artys
+      - FABRIC_CA_SERVER_CA_NAME=ca.org1.artys
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.artys-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/74ba0e425ce17296c31f7aa9504d3f3e2bcfcb1d810f7dcf62944b50151ab8d0_sk
+    ports:
+      - "7054:7054"
+    volumes:
+      - /home/gautam/artys_2024/artys-blockchain-master/data/builder/crypto-config/peerOrganizations/org1.artys/ca/:/etc/hyperledger/fabric-ca-server-config
+      - /home/gautam/artys_2024/artys-blockchain-master/data/builder/crypto-config/peerOrganizations/org1.artys:/etc/hyperledger/fabric-ca-server
+    networks:
+      - artys_net
+      
+  # ca.org2.artys:
+  #   container_name: ca.org2.artys
+  #   extends:
+  #     file: /home/src/docker-compose-base.yml
+  #     service: ca
+  #   environment:
+  #     - FABRIC_CA_SERVER_CSR_CN=ca.org2.artys
+  #     - FABRIC_CA_SERVER_CSR_HOSTS=ca.org2.artys
+  #     - FABRIC_CA_SERVER_CA_NAME=ca.org2.artys
+  #     - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org2.artys-cert.pem
+  #     - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/
+  #   ports:
+  #     - "8054:7054"
+  #   volumes:
+  #     - /home/gautam/artys_2024/artys-blockchain-master/data/builder/crypto-config/peerOrganizations/org2.artys/ca/:/etc/hyperledger/fabric-ca-server-config
+  #     - /home/gautam/artys_2024/artys-blockchain-master/data/builder/crypto-config/peerOrganizations/org2.artys:/etc/hyperledger/fabric-ca-server
+  #   networks:
+  #     - artys_net
+
+  ##################################################################################################################
+  ###                                                CLI                                                         ###
+  ##################################################################################################################
+  cli:
+    container_name: cli.artys
+    image: hyperledger/fabric-tools:1.4.3
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - FABRIC_LOGGING_SPEC=info
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.org1.artys:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.artys/users/Admin@org1.artys/msp
+      - CORE_CHAINCODE_KEEPALIVE=10
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/
+        - /home/gautam/artys_2024/artys-blockchain-master/data/builder/crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+    networks:
+      - artys_net
+
+  ##################################################################################################################
+  ###                                                Orderers                                                    ###
+  ##################################################################################################################
+  orderer.artys:
+    container_name: orderer.artys
+    extends:
+      file: /home/src/docker-compose-base.yml
+      service: orderer
+    environment:
+      - ORDERER_HOST=orderer.artys
+      - ORDERER_GENERAL_GENESISPROFILE=FabricOrdererGenesis
+      - CONFIGTX_ORDERER_ORDERERTYPE=solo
+    ports:
+      - 7050:7050
+    volumes:
+      - /home/gautam/artys_2024/artys-blockchain-master/data/builder/config:/etc/hyperledger/configtx
+      - /home/gautam/artys_2024/artys-blockchain-master/data/builder/crypto-config/ordererOrganizations/artys/orderers/orderer.artys:/etc/hyperledger/msp/orderer
+    depends_on:
+      - ca.org1.artys
+    networks:
+      - artys_net
+
+  ##################################################################################################################
+  ###                                                Peers                                                       ###
+  ##################################################################################################################
+  peer0.org1.artys:
+    extends:
+      file: /home/src/docker-compose-base.yml
+      service: peer
+    container_name: peer0.org1.artys
+    environment:
+      - CORE_PEER_ID=peer0.org1.artys
+      - CORE_PEER_ADDRESS=peer0.org1.artys:7051
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artys_net
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.artys:7051
+    ports:
+      - 7051:7051
+      - 7053:7053
+    volumes:
+        - /home/gautam/artys_2024/artys-blockchain-master/data/builder/config:/etc/hyperledger/configtx
+        - /home/gautam/artys_2024/artys-blockchain-master/data/builder/crypto-config/peerOrganizations/org1.artys/peers/peer0.org1.artys/msp:/etc/hyperledger/peer/msp
+        - /home/gautam/artys_2024/artys-blockchain-master/data/builder/crypto-config/peerOrganizations/org1.artys/users:/etc/hyperledger/msp/users
+    depends_on:
+      - couchdb0
+    networks:
+      - artys_net
+
+  # peer0.org2.artys:
+  #   extends:
+  #     file: /home/src/docker-compose-base.yml
+  #     service: peer
+  #   container_name: peer0.org2.artys
+  #   environment:
+  #     - CORE_PEER_ID=peer0.org2.artys
+  #     - CORE_PEER_ADDRESS=peer0.org2.artys:7051
+  #     - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artys_net
+  #     - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
+  #     - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.artys:7051
+  #   ports:
+  #     - 8051:7051
+  #     - 8053:7053
+  #   volumes:
+  #       - /home/gautam/artys_2024/artys-blockchain-master/data/builder/config:/etc/hyperledger/configtx
+  #       - /home/gautam/artys_2024/artys-blockchain-master/data/builder/crypto-config/peerOrganizations/org2.artys/peers/peer0.org2.artys/msp:/etc/hyperledger/peer/msp
+  #       - /home/gautam/artys_2024/artys-blockchain-master/data/builder/crypto-config/peerOrganizations/org2.artys/users:/etc/hyperledger/msp/users
+  #   depends_on:
+  #     - couchdb1
+  #   networks:
+  #     - artys_net
+  
+  ##################################################################################################################
+  ###                                                Couch DBs                                                   ###
+  ##################################################################################################################
+  couchdb0:
+    extends:
+      file: /home/src/docker-compose-base.yml
+      service: couchdb
+    container_name: couchdb0.artys
+    ports:
+      - 5984:5984
+    environment:
+      DB_URL: http://localhost:5984/member_db
+    depends_on:
+      - orderer.artys
+    networks:
+      - artys_net
+
+  # couchdb1:
+  #   extends:
+  #     file: /home/src/docker-compose-base.yml
+  #     service: couchdb
+  #   container_name: couchdb1
+  #   ports:
+  #     - 6984:5984
+  #   environment:
+  #     DB_URL: http://localhost:5984/member_db
+  #   depends_on:
+  #     - orderer.artys
+  #   networks:
+  #     - artys_net
+
+
+##################################################################################################################
+###                                                   APIs                                                     ###
+##################################################################################################################
+  api0:
+    extends:
+      file: /home/src/docker-compose-base.yml
+      service: api
+    image: registry.gitlab.com/gautam.atre/fabric-architecture-seed/api:gql-1.4.7
+    container_name: api0.artys
+    command: ["yarn", "start:prod"]
+    ports:
+      - 4000:4000
+    depends_on:
+      - orderer.artys
+      - peer0.org1.artys
+      - ca.org1.artys
+    environment: 
+      # Nest conf
+      - JWT_SECRET=imasecuresecret
+      - LOG_LEVEL=info
+      - PORT=4000
+      # Fabric conf
+      - FABRIC_ADMIN_NAME=admin
+      - FABRIC_ADMIN_PASSWORD=adminpw
+      - FABRIC_API_USER=user-api-local
+      - FABRIC_WALLET_STORE_PATH=/data/hfc-key-store
+      - FABRIC_CHAINCODE_ID=artys
+      - FABRIC_MSPID=Org1MSP
+      - FABRIC_CHANNEL_NAME=fabricchannel
+      - FABRIC_CHANNEL_PROFILE_PATH=/app/assets/network.json
+      - FABRIC_CA_TLS_PATH=/data/txt
+      - FABRIC_CA_NAME=ca.org1.artys
+      - FABRIC_CA_URI=http://ca.org1.artys:7054
+      # Chaincode model for graphQL automatic generation
+      - BLOCKCHAIN_JSON_PATH=/app/assets/config.json
+    networks:
+      - artys_net
+    volumes:
+      - /home/gautam/artys_2024/artys-blockchain-master/api:/app/assets

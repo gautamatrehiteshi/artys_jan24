@@ -1,0 +1,7 @@
+# local node files
+**/node_modules
+package-lock.json
+yarn.lock
+
+# data folder
+# data/*

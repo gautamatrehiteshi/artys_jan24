@@ -1,0 +1,13 @@
+{
+  "extends": ["airbnb-standard"],
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true
+    }
+  },
+  "rules": {
+    "class-methods-use-this": "off",
+    "valid-typeof": "off"
+  }
+}

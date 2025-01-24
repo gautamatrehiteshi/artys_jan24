@@ -1,0 +1,37 @@
+version: '3'
+
+networks:
+  net:
+
+services:
+  builder:
+    image: registry.${BUILDER_REGISTRY}/builder:latest
+    container_name: ${PROJECT_NAME}.builder
+    environment:
+      # Blockchain variables
+      - NAMESPACE=${PROJECT_NAME}
+      - CHANNEL_NAME=fabricchannel
+      - ORGANISATION_NAME=Org1
+      # Docker variables
+      - DOCKER_NETWORK=${PROJECT_NAME}_net
+      - VOLUME_CFG=${PWD}/data/builder
+      - VOLUME_API=${PWD}/api
+      # txgen profils in configtx.yaml
+      - GENESIS_PROFIL=FabricOrdererGenesis
+      - PROFIL=FabricChannel
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/builder:/data
+    networks:
+      - net
+
+  test:
+    build: ./chaincode
+    container_name: ${PROJECT_NAME}.testrunner
+    command: yarn run test
+    volumes:
+      - ./chaincode/src:/usr/app/src
+      - ./chaincode/test:/usr/app/test
+      - ./data/model:/data
+    networks:
+      - net

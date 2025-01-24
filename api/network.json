@@ -1,0 +1,24 @@
+{
+  "name": "fabricchannel",
+  "description": "Cajole local deploymeent",
+  "version": "1.0.0",
+  "client": {
+    "organization": "Org1MSP"
+  },
+  "organizations": {
+    "Org1MSP": {
+      "mspid": "Org1MSP",
+      "peers": [
+        "peer0.org1.artys:7051"
+      ],
+      "certificateAuthorities": [
+        "orderer.artys:7054"
+      ]
+    }
+  },
+  "peers": {
+    "peer0.org1.artys:7051": {
+      "url": "grpc://peer0.org1.artys:7051"
+    }
+  }
+}
