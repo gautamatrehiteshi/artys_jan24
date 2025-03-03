@@ -19,7 +19,7 @@ services:
       - FABRIC_CA_SERVER_CSR_HOSTS=ca.org1.artys
       - FABRIC_CA_SERVER_CA_NAME=ca.org1.artys
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.artys-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/74ba0e425ce17296c31f7aa9504d3f3e2bcfcb1d810f7dcf62944b50151ab8d0_sk
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/2ba53e228281f23eff482db23fd4ce9abc61ad216bc1a9e59975ccefe02ab26f_sk
     ports:
       - "7054:7054"
     volumes:

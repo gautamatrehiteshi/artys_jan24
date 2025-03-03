@@ -4,4 +4,4 @@ package-lock.json
 yarn.lock
 
 # data folder
-# data/*
+data

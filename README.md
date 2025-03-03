@@ -9,14 +9,23 @@ With this repository, you can:
 
 Testing setup is prepackaged in convenient docker images to provide on demand development environment with easy cleanup.
 
-# What do I need ?
+# What do I need/Prerequisites ?
+
+Before you begin, ensure you have the following installed on your system:
+
+- **Docker Desktop**  
+  - Tested with **Docker Server v24.0.5** on Linux (Docker Desktop) 
+- **Docker Compose** (v2.20.2-desktop.1 or later)
+- **GNU Make** (v4.3 recommended)
+- **Node.js** (v12.22.12 recommended) with **npm** or **yarn** for managing JavaScript dependencies
+- **Git** (to clone the repository)
  - [x] docker
  - [ ] yarn/npm (optional) for local linter installation
 
 # Running the code
 The following commands will setup your development environment:
  - `yarn` or `npm install` to install a linter locally. Useful for development.
- - `make start` to spawn a development environment, deploy a blockchain and install the chaincode with version ***v=1***.
+ - `make start` to spawn a development environment, deploy a blockchain and install the chaincode.
 
 
 After running `make start`, you can manipulate the development environment with the following cmd:
@@ -138,28 +147,4 @@ Tests are passed similarily to source files through volumes. There are 2 folders
  - Unit testing is done in ***test/unitTest*** and are executed directly in the development environment.
  - Functional tests are compiled in the development environment and can be packaged and deployed on a local Hyperledger Fabric Blockchain instance, using the VS Code extension.
 
-# Kubernetes deployment on Peer Node:
 
-Attach a bash to your Peer pod:
-```
-kubectl exec -it -n peers <id_pod_peer> -- bash
-
-### Select the right path for the admin msp
-CORE_PEER_MSPCONFIGPATH=/var/hyperledger/admin_msp
-
-### Clone the repository of the chosen chaincode
-apt update && apt install git -y (if necessary)
-
-### Install the chaincode on the Peer
-mv <repository_chaincode>/chaincode /var/hyperledger/
-peer chaincode install -l node -n <chaincode_name> -v <verion_number> -p /var/hyperledger/chaincode/
-
-### Instantiate on the chosen Network (channel)
-peer chaincode instantiate -C <channel_name> -l node -n <chaincode_name> -v <versio_number> -c '{"Args":["init", "<chaincode_name>"]}' -P "AND ('PeerMSP.member')"
-```
-working dependencies version
-Docker version  - 27.5.0, build a187fa5
-Docker Compose version v2.20.2-desktop.1
-GNU Make 4.3
-Built for x86_64-pc-linux-gnu
-node version -   v12.22.12
