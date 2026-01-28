@@ -15,6 +15,7 @@ Before you begin, ensure you have the following installed on your system:
 
 - **Docker Desktop**  
   - Tested with **Docker Server v24.0.5** on Linux (Docker Desktop) 
+- **Ubuntu** (22.4lts)
 - **Docker Compose** (v2.20.2-desktop.1 or later)
 - **GNU Make** (v4.3 recommended)
 - **Node.js** (v12.22.12 recommended) with **npm** or **yarn** for managing JavaScript dependencies
